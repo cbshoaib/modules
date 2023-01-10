@@ -162,3 +162,74 @@ class MailchimpTemplatesViewSet(GenericViewSet):
         return Response(response.get('text'), status=response.get('status_code'))
 
 
+class MailchimpCampaignViewSet(GenericViewSet):
+
+    @action(detail=False, methods=['get'], url_path='list-campaigns')
+    def list_campaigns(self, request):
+        response = mailchimp_service.list_campaigns()
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=False, methods=['post'], url_path='add-campaigns')
+    def add_campaigns(self, request):
+        response = mailchimp_service.add_template(body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['get'], url_path='get-campaign-info')
+    def get_campaign_info(self, request, pk):
+        response = mailchimp_service.get_campaign_info(campaign_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='delete-campaign')
+    def delete_campaign(self, request, pk):
+        response = mailchimp_service.delete_campaign(campaign_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='update-campaign-settings')
+    def update_campaign_settings(self, request, pk):
+        response = mailchimp_service.update_campaign_settings(campaign_id=pk, body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='cancel-campaign')
+    def cancel_campaign(self, request, pk):
+        response = mailchimp_service.cancel_campaign(campaign_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='send-campaign')
+    def send_campaign(self, request, pk):
+        response = mailchimp_service.send_campaign(campaign_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='send-campaign')
+    def schedule_campaign(self, request, pk):
+        response = mailchimp_service.schedule_campaign(campaign_id=pk, body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='unschedule-campaign')
+    def unschedule_campaign(self, request, pk):
+        response = mailchimp_service.unschedule_campaign(campaign_id=pk, body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=False, methods=['get'], url_path='list-campaign-folder')
+    def list_campaign_folder(self, request):
+        response = mailchimp_service.list_template_folder()
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=False, methods=['post'], url_path='add-campaign-folder')
+    def add_campaign_folder(self, request):
+        response = mailchimp_service.add_campaign_folder(body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='get-campaign-folder')
+    def get_campaign_folder(self, request, pk):
+        response = mailchimp_service.get_campaign_folder(folder_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='delete_campaign_folder')
+    def delete_campaign_folder(self, request, pk):
+        response = mailchimp_service.delete_campaign_folder(folder_id=pk)
+        return Response(response.get('text'), status=response.get('status_code'))
+
+    @action(detail=True, methods=['post'], url_path='update-campaign-folder')
+    def update_campaign_folder(self, request, pk):
+        response = mailchimp_service.update_campaign_folder(folder_id=pk, body=request.body)
+        return Response(response.get('text'), status=response.get('status_code'))
