@@ -13,7 +13,8 @@ class MailchimpService:
                 "api_key": os.getenv("MAILCHIMP_API_KEY", ""),
                 "server": os.getenv("MAILCHIMP_SERVER_REGION", "")
             }
-        self.mailchimp_client = MailchimpMarketing.Client().set_config(config)
+        self.mailchimp_client = MailchimpMarketing.Client()
+        self.mailchimp_client.set_config(config)
 
     def get_audience_lists(self, **kwargs):
         try:
