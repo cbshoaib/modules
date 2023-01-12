@@ -16,10 +16,6 @@ class MailchimpService:
             }
         self.mailchimp_client = MailchimpMarketing.Client()
         self.mailchimp_client.set_config(config)
-
-    @staticmethod
-    def convert_bytes_to_dict(body):
-        return json.loads(body.decode('utf-8'))
     
     def get_audience_lists(self, **kwargs):
         try:
@@ -30,8 +26,8 @@ class MailchimpService:
 
     def add_audience_list(self, body):
         try:
-            response = self.mailchimp_client.lists.create_list(body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+            response = self.mailchimp_client.lists.create_list(body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -44,7 +40,7 @@ class MailchimpService:
 
     def update_audience_list(self, list_id: str, body):
         try:
-            response = self.mailchimp_client.lists.update_list(list_id, body=self.convert_bytes_to_dict(body))
+            response = self.mailchimp_client.lists.update_list(list_id, body=body)
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
@@ -52,13 +48,13 @@ class MailchimpService:
     def delete_audience_list(self, list_id: str):
         try:
             response = self.mailchimp_client.lists.delete_list(list_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def batch_subscribe_or_unsubscribe_audience(self, list_id: str, body):
         try:
-            response = self.mailchimp_client.lists.batch_list_members(list_id, body=self.convert_bytes_to_dict(body))
+            response = self.mailchimp_client.lists.batch_list_members(list_id, body=body)
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
@@ -73,9 +69,9 @@ class MailchimpService:
     def add_list_member(self, list_id: str, body):
         try:
             response = self.mailchimp_client.lists.add_list_member(list_id=list_id,
-                                                                   body=self.convert_bytes_to_dict(body)
+                                                                   body=body
                                                                    )
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -90,7 +86,7 @@ class MailchimpService:
         try:
             response = self.mailchimp_client.lists.update_list_member(list_id=list_id,
                                                                       subscriber_hash=subscriber_hash,
-                                                                      body=self.convert_bytes_to_dict(body)
+                                                                      body=body
                                                                       )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -100,7 +96,7 @@ class MailchimpService:
         try:
             response = self.mailchimp_client.lists.delete_list_member_permanent(list_id=list_id,
                                                                                 subscriber_hash=subscriber_hash)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -116,7 +112,7 @@ class MailchimpService:
         try:
             response = self.mailchimp_client.lists.update_list_member_tags(list_id=list_id,
                                                                            subscriber_hash=subscriber_hash,
-                                                                           body=self.convert_bytes_to_dict(body)
+                                                                           body=body
                                                                            )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -132,8 +128,8 @@ class MailchimpService:
     def add_segment(self, list_id: str, body):
         try:
             response = self.mailchimp_client.lists.create_segment(list_id=list_id,
-                                                                  body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+                                                                  body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -147,14 +143,14 @@ class MailchimpService:
     def delete_segment(self, list_id: str, segment_id: str):
         try:
             response = self.mailchimp_client.lists.delete_segment(list_id=list_id, segment_id=segment_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def update_segment(self, list_id: str, segment_id: str, body):
         try:
             response = self.mailchimp_client.lists.update_segment(list_id=list_id, segment_id=segment_id,
-                                                                  body=self.convert_bytes_to_dict(body)
+                                                                  body=body
                                                                   )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -169,8 +165,8 @@ class MailchimpService:
 
     def add_template(self, body):
         try:
-            response = self.mailchimp_client.templates.create(body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+            response = self.mailchimp_client.templates.create(body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -184,14 +180,14 @@ class MailchimpService:
     def delete_template(self, template_id: str):
         try:
             response = self.mailchimp_client.templates.delete_template(template_id=template_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def update_template(self, template_id: str, body):
         try:
             response = self.mailchimp_client.templates.update_template(template_id=template_id,
-                                                                       body=self.convert_bytes_to_dict(body)
+                                                                       body=body
                                                                        )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -206,8 +202,8 @@ class MailchimpService:
 
     def add_template_folder(self, body):
         try:
-            response = self.mailchimp_client.templateFolders.create(body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+            response = self.mailchimp_client.templateFolders.create(body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -221,14 +217,14 @@ class MailchimpService:
     def delete_template_folder(self, folder_id: str):
         try:
             response = self.mailchimp_client.templateFolders.remove(folder_id=folder_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def update_template_folder(self, folder_id: str, body):
         try:
             response = self.mailchimp_client.templateFolders.update(folder_id=folder_id,
-                                                                    body=self.convert_bytes_to_dict(body)
+                                                                    body=body
                                                                     )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -243,8 +239,8 @@ class MailchimpService:
 
     def add_campaigns(self, body):
         try:
-            response = self.mailchimp_client.campaigns.create(body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+            response = self.mailchimp_client.campaigns.create(body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'error': error.text, 'status_code': error.status_listcode}
 
@@ -258,14 +254,14 @@ class MailchimpService:
     def delete_campaign(self, campaign_id: str):
         try:
             response = self.mailchimp_client.campaigns.remove(campaign_id=campaign_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def update_campaign_settings(self, campaign_id: str, body):
         try:
             response = self.mailchimp_client.campaigns.update(campaign_id=campaign_id,
-                                                              body=self.convert_bytes_to_dict(body)
+                                                              body=body
                                                               )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
@@ -288,17 +284,15 @@ class MailchimpService:
     def schedule_campaign(self, campaign_id: str,  body):
         try:
             response = self.mailchimp_client.campaigns.schedule(campaign_id=campaign_id,
-                                                                body=self.convert_bytes_to_dict(body)
+                                                                body=body
                                                                 )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
-    def unschedule_campaign(self, campaign_id: str,  body):
+    def unschedule_campaign(self, campaign_id: str):
         try:
-            response = self.mailchimp_client.campaigns.unschedule(campaign_id=campaign_id,
-                                                                  body=self.convert_bytes_to_dict(body)
-                                                                  )
+            response = self.mailchimp_client.campaigns.unschedule(campaign_id=campaign_id)
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
@@ -312,8 +306,8 @@ class MailchimpService:
 
     def add_campaign_folder(self, body):
         try:
-            response = self.mailchimp_client.campaignFolders.create(body=self.convert_bytes_to_dict(body))
-            return {'text': response, 'status_code': 200}
+            response = self.mailchimp_client.campaignFolders.create(body=body)
+            return {'text': response, 'status_code': 201}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
@@ -327,14 +321,14 @@ class MailchimpService:
     def delete_campaign_folder(self, folder_id: str):
         try:
             response = self.mailchimp_client.campaignFolders.remove(folder_id=folder_id)
-            return {'text': response, 'status_code': 200}
+            return {'text': response, 'status_code': 204}
         except ApiClientError as error:
             return {'text': error.text, 'status_code': error.status_code}
 
     def update_campaign_folder(self, folder_id: str, body):
         try:
             response = self.mailchimp_client.campaignFolders.update(folder_id=folder_id,
-                                                                    body=self.convert_bytes_to_dict(body)
+                                                                    body=body
                                                                     )
             return {'text': response, 'status_code': 200}
         except ApiClientError as error:
