@@ -16,12 +16,8 @@ def get_private_key(private_key_path):
      :param str private_key_path: Complete path of private key (required)
     """
     private_key_file = path.abspath(private_key_path)
-    if path.isfile(private_key_file):
-        with open(private_key_file) as private_key_file:
-            private_key = private_key_file.read()
-    else:
-        private_key = private_key_path
-
+    with open(private_key_file) as private_key_file:
+        private_key = private_key_file.read()
     return private_key
 
 
@@ -36,17 +32,6 @@ def get_envelope_list(folder_data):
         del row_data['_configuration']
         envelopes_list.append(row_data)
     return envelopes_list
-
-
-def get_consent_url():
-    """
-    Return the consent url that will use further to get access token
-    """
-    url_scopes = "+".join(settings.SCOPES)
-    consent_url = f"https://account-d.docusign.com/oauth/auth?response_type=code&" \
-                  f"scope={url_scopes}&client_id={settings.CLIENT_ID}&redirect_uri={settings.REDIRECT_URI}"
-
-    return consent_url
 
 
 def get_authorize_client(access_token):
@@ -95,15 +80,7 @@ class AuthTokenViewSet(APIView):
             return Response(payload, status=status.HTTP_200_OK)
         except Exception as e:
             body = e.body.decode('utf8')
-            if "consent_required" in body:
-                consent_url = get_consent_url()
-                return Response({
-                    "errorCode": "CONSENT_REQUIRED",
-                    "message": "Consent required",
-                    "consent_url": consent_url
-                }, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(json.loads(body), status=status.HTTP_400_BAD_REQUEST)
+            return Response(json.loads(body), status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateEnvelopeViewSet(APIView):

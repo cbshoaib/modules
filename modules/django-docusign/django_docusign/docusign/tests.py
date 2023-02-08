@@ -78,6 +78,11 @@ class AuthTokenTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         request_jwt_user_token_mock.assert_called_once()
 
+    def test_get_auth_token_without_client_id(self):
+        url = "/modules/docusign/auth/token/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class CreateEnvelopeTestCase(APITestCase):
     def setUp(self):
@@ -283,4 +288,3 @@ class RetrieveAllEnvelopeTestCase(APITestCase):
         }
         response = self.client.get(url, params)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
