@@ -1,26 +1,53 @@
-import React, { Fragment, useState, useContext } from "react";
+import React, { Fragment, useContext } from "react";
 import { Text, StyleSheet, View } from "react-native";
-import { getGoogleAuthenticatorQR, sendVerification } from "../../api";
+import { useSelector, useDispatch } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
+
 import Button from "../../components/Button";
 import Loader from "../../components/Loader";
 import { OptionsContext } from "@options";
+import { getGoogleAuthenticatorQR, sendVerification } from "../../store";
 
-const AuthTypes = (props) => {
+const AuthTypes = ({ navigation }) => {
+  // This variables gets the loading status for sendVerification code api
+  const loading = useSelector(
+    (state) => state?.Authentication?.sendVerification?.api?.loading
+  );
+  // This variables gets the loading status for getGoogleAuthenticatorQR code api
+  const googleAuthenticatorLoading = useSelector(
+    (state) => state?.Authentication?.getGoogleAuthenticatorQR?.api?.loading
+  );
+
+  const isLoading =
+    !!(loading === "pending" || googleAuthenticatorLoading === "pending");
+
+  const dispatch = useDispatch();
+
   const options = useContext(OptionsContext);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const onHandleMethod = async (method) => {
-    setIsLoading(true);
-    let apiResult = null;
-    if (method === "google_authenticator") { apiResult = await getGoogleAuthenticatorQR(); } else { apiResult = await sendVerification({ method: method }); }
-    const payload = await apiResult.json();
-    console.log("payload", payload);
-    setIsLoading(false);
-    if (apiResult.ok) {
-      props.navigation.navigate("Verification", { method: method, link: payload?.link });
+    if (method === "google_authenticator") {
+      // This action dispatches api to get google authenticator qr code link.
+      dispatch(getGoogleAuthenticatorQR())
+        .then(unwrapResult)
+        .then((res) => {
+          navigation.navigate("Verification", {
+            method: method,
+            link: res?.link
+          });
+        })
+        .catch((err) => console.log("NOT WORKING", err));
     } else {
-      setErrors(payload);
+    // This action dispatches api to get code. It takes verification method as params
+      dispatch(sendVerification({ method: method }))
+        .then(unwrapResult)
+        .then((res) => {
+          navigation.navigate("Verification", {
+            method: method,
+            link: res?.link
+          });
+        })
+        .catch((err) => console.log("NOT WORKING", err));
     }
   };
 
@@ -29,17 +56,15 @@ const AuthTypes = (props) => {
       {isLoading && <Loader />}
       <View style={styles.main}>
         <Text style={styles.text}>Verification methods</Text>
-        <Text style={styles.text13}>Please select an option for verification from the following:</Text>
+        <Text style={styles.text13}>
+          Please select an option for verification from the following:
+        </Text>
         <View style={options.styles.FlexRowSpaceBetween}>
           <View style={[options.styles.wp50, options.styles.p5]}>
-            <Button onPress={() => onHandleMethod("phone_number")}>
-              SMS
-            </Button>
+            <Button onPress={() => onHandleMethod("phone_number")}>SMS</Button>
           </View>
           <View style={[options.styles.wp50, options.styles.p5]}>
-            <Button onPress={() => onHandleMethod("email")}>
-              Email
-            </Button>
+            <Button onPress={() => onHandleMethod("email")}>Email</Button>
           </View>
         </View>
         <View style={[options.styles.wp100, options.styles.p5]}>
@@ -47,19 +72,6 @@ const AuthTypes = (props) => {
             Google Authenticator
           </Button>
         </View>
-      </View>
-      <View style={styles.main}>
-        {
-          Object.keys(errors).map(key => (
-            <Fragment key={key}>
-              {
-                errors.length
-                  ? errors[key].map((obj, index) => <Text key={index} style={styles.error}>{key}: {obj}</Text>)
-                  : <Text style={styles.error}>{ errors[key] }</Text>
-              }
-            </Fragment>
-          ))
-        }
       </View>
     </Fragment>
   );
@@ -78,11 +90,6 @@ const styles = StyleSheet.create({
   text13: {
     fontSize: 13,
     marginBottom: 12
-  },
-  error: {
-    paddingLeft: 5,
-    fontStyle: "italic",
-    color: "red"
   }
 });
 

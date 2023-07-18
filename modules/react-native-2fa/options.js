@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   }
 });
 
-// User token
+// Set user access token
 const token = "";
 
 export default {
