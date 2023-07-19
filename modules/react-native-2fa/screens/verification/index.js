@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useSelector, useDispatch } from "react-redux";
@@ -7,10 +7,17 @@ import { useSelector, useDispatch } from "react-redux";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import Loader from "../../components/Loader";
-import { verifyCode, sendVerification } from "../../store";
+import {
+  verifyCode,
+  sendVerification,
+  verifyEnableAuthenticationCode,
+  enableAuthentication
+} from "../../store";
 
 const Verification = ({ navigation }) => {
   const dispatch = useDispatch();
+  const route = useRoute();
+  const { method, link, authenticationType } = route.params;
 
   // This variables gets the loading status for sendVerification code api
   const loading = useSelector(
@@ -21,35 +28,74 @@ const Verification = ({ navigation }) => {
     (state) => state?.Authentication?.verifyCode?.api?.loading
   );
 
-  const isLoading = !!(
-    verifyCodeLoading === "pending" || loading === "pending"
+  // This variables gets the loading status for enableAuthentication api
+  const enableAuthenticationLoading = useSelector(
+    (state) => state?.Authentication?.enableAuthentication?.api?.loading
   );
 
-  const route = useRoute();
-  const { method, link } = route.params;
+  // This variables gets the loading status for verifyEnableAuthenticationCode api
+  const verifyEnableAuthenticationCodeLoading = useSelector(
+    (state) =>
+      state?.Authentication?.verifyEnableAuthenticationCode?.api?.loading
+  );
+
+  const isLoading = !!(
+    verifyCodeLoading === "pending" ||
+    loading === "pending" ||
+    enableAuthenticationLoading === "pending" ||
+    verifyEnableAuthenticationCodeLoading === "pending"
+  );
+
   const [code, setCode] = useState("");
 
   const handleVerification = async () => {
-    // This action dispatches api for code verification. It takes verification method and code as params
-    dispatch(verifyCode({ method: method, code: code }))
-      .then(unwrapResult)
-      .then(() => {
-        navigation.navigate("Home");
-      })
-      .catch((err) => console.log("NOT WORKING", err));
+    if (authenticationType) {
+      // This action dispatches api to get authentication enabling code. It takes verification method and code as params
+      dispatch(verifyEnableAuthenticationCode({ method: method, code: code }))
+        .then(unwrapResult)
+        .then(() => {
+          navigation.navigate("AuthTypes");
+          Alert.alert("Success", "Two factor authentication has been enabled");
+        })
+        .catch((err) => console.log("Error", err));
+    } else {
+      // This action dispatches api for code verification. It takes verification method and code as params
+      dispatch(verifyCode({ method: method, code: code }))
+        .then(unwrapResult)
+        .then(() => {
+          navigation.navigate("Home");
+        })
+        .catch((err) => console.log("Error", err));
+    }
+  };
+
+  const onApiSuccess = (res) => {
+    navigation.navigate("Verification", {
+      method: method,
+      link: res?.link,
+      authenticationType: authenticationType ? "enable" : null
+    });
   };
 
   const handleResendCode = async () => {
-    // This action dispatches api to get code. It takes verification method as params
-    dispatch(sendVerification({ method: method }))
-      .then(unwrapResult)
-      .then((res) => {
-        navigation.navigate("Verification", {
-          method: method,
-          link: res?.link
-        });
-      })
-      .catch((err) => console.log("NOT WORKING", err));
+    if (authenticationType) {
+      // This action dispatches api to get the code again for authentication enabling. It takes verification method as params
+      dispatch(enableAuthentication({ method: method }))
+        .then(unwrapResult)
+        .then((res) => {
+          onApiSuccess(res);
+          Alert.alert("OTP sent", "Please check your inbox!");
+        })
+        .catch((err) => console.log("Error", err));
+    } else {
+      // This action dispatches api to get code. It takes verification method as params
+      dispatch(sendVerification({ method: method }))
+        .then(unwrapResult)
+        .then((res) => {
+          onApiSuccess(res);
+        })
+        .catch((err) => console.log("Error", err));
+    }
   };
   const handleQRCode = () => {
     navigation.navigate("GoogleAuth", {
@@ -65,13 +111,16 @@ const Verification = ({ navigation }) => {
           {method === "google_authenticator"
             ? (
             <Text style={styles.text}>
-              Enter your 6-digits code from Google Authenticator App
+              Enter your 6-digits code from Google Authenticator App{" "}
+              {authenticationType && "to enable two factor authentication"}
             </Text>
               )
             : (
             <Text style={styles.text}>
               Verification code has been sent to your{" "}
-              {method === "phone_number" ? "Phone number" : "Email"}
+              {method === "phone_number" ? "Phone number." : "Email."}
+              {authenticationType &&
+                " Please enter it to enable two factor authentication"}
             </Text>
               )}
           <Input

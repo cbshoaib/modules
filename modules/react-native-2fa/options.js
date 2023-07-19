@@ -2,10 +2,13 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   FlexRowSpaceBetween: {
-    display: "flex", flexDirection: "row", justifyContent: "space-between"
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between"
   },
   FlexRow: {
-    display: "flex", flexDirection: "row"
+    display: "flex",
+    flexDirection: "row"
   },
   wp50: {
     width: "50%"

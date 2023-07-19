@@ -1,14 +1,38 @@
-import React, { Fragment, useContext } from "react";
-import { Text, StyleSheet, View } from "react-native";
+import React, { Fragment, useContext, useState, useEffect } from "react";
+import { Text, StyleSheet, View, Alert } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { unwrapResult } from "@reduxjs/toolkit";
+import DropDownPicker from "react-native-dropdown-picker";
+import { useIsFocused } from "@react-navigation/native";
 
 import Button from "../../components/Button";
 import Loader from "../../components/Loader";
 import { OptionsContext } from "@options";
-import { getGoogleAuthenticatorQR, sendVerification } from "../../store";
+import {
+  checkAuthenticationStatus,
+  disableAuthenticationStatus,
+  enableAuthentication,
+  getGoogleAuthenticatorQR,
+  sendVerification
+} from "../../store";
 
 const AuthTypes = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      // This action dispatches checkAuthenticationStatus Api.
+      dispatch(checkAuthenticationStatus())
+        .then(unwrapResult)
+        .then((res) => {
+          setValue(res?.method);
+          setIsVerified(true);
+        })
+        .catch(() => setValue("None"));
+    }
+  }, [isFocused]);
+
   // This variables gets the loading status for sendVerification code api
   const loading = useSelector(
     (state) => state?.Authentication?.sendVerification?.api?.loading
@@ -17,13 +41,71 @@ const AuthTypes = ({ navigation }) => {
   const googleAuthenticatorLoading = useSelector(
     (state) => state?.Authentication?.getGoogleAuthenticatorQR?.api?.loading
   );
+  // This variables gets the loading status for enableAuthentication api
+  const enableAuthenticationLoading = useSelector(
+    (state) => state?.Authentication?.enableAuthentication?.api?.loading
+  );
 
-  const isLoading =
-    !!(loading === "pending" || googleAuthenticatorLoading === "pending");
+  // This variables gets the loading status for enableAuthentication api
+  const checkAuthenticationLoading = useSelector(
+    (state) => state?.Authentication?.checkAuthenticationStatus?.api?.loading
+  );
 
-  const dispatch = useDispatch();
+  // This variables gets the loading status for disableAuthentication api
+  const disableAuthenticationLoading = useSelector(
+    (state) => state?.Authentication?.disableAuthentication?.api?.loading
+  );
+
+  const isLoading = !!(
+    loading === "pending" ||
+    googleAuthenticatorLoading === "pending" ||
+    enableAuthenticationLoading === "pending" ||
+    checkAuthenticationLoading === "pending" ||
+    disableAuthenticationLoading === "pending"
+  );
 
   const options = useContext(OptionsContext);
+
+  const [isVerified, setIsVerified] = useState(false);
+
+  // States for dropdown
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("None");
+  const [items, setItems] = useState([
+    { label: "SMS", value: "phone_number" },
+    { label: "Email", value: "email" },
+    { label: "Google Authenticator", value: "google_authenticator" },
+    { label: "None", value: "None" }
+  ]);
+
+  const onApiSuccess = (res, value, type) => {
+    navigation.navigate("Verification", {
+      method: value,
+      link: res?.link,
+      authenticationType: type ? "enable" : null
+    });
+  };
+
+  const onValueChange = ({ value }) => {
+    if (value === "None" && isVerified) {
+      // This action dispatches disableAuthenticationStatus Api
+      dispatch(disableAuthenticationStatus())
+        .then(unwrapResult)
+        .then((res) => {
+          setIsVerified(false);
+          Alert.alert("Success", "Two Factor Authentication is disabled");
+        })
+        .catch((err) => console.log("NOT WORKING", err));
+    } else if (value !== "None") {
+      // This action dispatches enableAuthentication Apis
+      dispatch(enableAuthentication({ method: value }))
+        .then(unwrapResult)
+        .then((res) => {
+          onApiSuccess(res, value, true);
+        })
+        .catch((err) => console.log("NOT WORKING", err));
+    }
+  };
 
   const onHandleMethod = async (method) => {
     if (method === "google_authenticator") {
@@ -31,21 +113,15 @@ const AuthTypes = ({ navigation }) => {
       dispatch(getGoogleAuthenticatorQR())
         .then(unwrapResult)
         .then((res) => {
-          navigation.navigate("Verification", {
-            method: method,
-            link: res?.link
-          });
+          onApiSuccess(res, method, false);
         })
         .catch((err) => console.log("NOT WORKING", err));
     } else {
-    // This action dispatches api to get code. It takes verification method as params
+      // This action dispatches api to get code. It takes verification method as params
       dispatch(sendVerification({ method: method }))
         .then(unwrapResult)
         .then((res) => {
-          navigation.navigate("Verification", {
-            method: method,
-            link: res?.link
-          });
+          onApiSuccess(res, method, false);
         })
         .catch((err) => console.log("NOT WORKING", err));
     }
@@ -59,19 +135,30 @@ const AuthTypes = ({ navigation }) => {
         <Text style={styles.text13}>
           Please select an option for verification from the following:
         </Text>
-        <View style={options.styles.FlexRowSpaceBetween}>
-          <View style={[options.styles.wp50, options.styles.p5]}>
-            <Button onPress={() => onHandleMethod("phone_number")}>SMS</Button>
-          </View>
-          <View style={[options.styles.wp50, options.styles.p5]}>
-            <Button onPress={() => onHandleMethod("email")}>Email</Button>
-          </View>
+
+        <View style={styles.dropdownContainer} zIndex={1}>
+          {!isVerified && !isLoading && (
+            <Text style={styles.authenticationText}>
+              Two Factor Authentication is disabled, please enable it through
+              one of the methods below
+            </Text>
+          )}
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items}
+            setOpen={setOpen}
+            setValue={setValue}
+            onSelectItem={onValueChange}
+            setItems={setItems}
+          />
         </View>
-        <View style={[options.styles.wp100, options.styles.p5]}>
-          <Button onPress={() => onHandleMethod("google_authenticator")}>
-            Google Authenticator
-          </Button>
-        </View>
+
+        {isVerified && (
+          <View style={[options.styles.wp90, options.styles.p5]}>
+            <Button onPress={() => onHandleMethod(value)}>Send OTP</Button>
+          </View>
+        )}
       </View>
     </Fragment>
   );
@@ -79,7 +166,24 @@ const AuthTypes = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   main: {
-    padding: 10
+    padding: 10,
+    zIndex: 1
+  },
+  authenticationText: {
+    marginBottom: 10,
+    color: "#000"
+  },
+  dropdownContainer: {
+    marginTop: 30,
+    marginBottom: 40
+  },
+  switchText: {
+    marginRight: 20
+  },
+  switchContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row"
   },
   text: {
     marginBottom: 5,

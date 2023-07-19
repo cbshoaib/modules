@@ -23,7 +23,8 @@ Keep the below packages in project's `package.json` file.
   "react-native-svg":"12.3.0"
   "react-native-country-picker-modal":"2.0.0",
   "react-native-qrcode-svg": "6.1.2",
-  "react-native-svg":"12.3.0"
+  "react-native-svg":"12.3.0",
+  "react-native-dropdown-picker": "^5.4.6"
 ```
 RUn the command to install dependencies:
   ```
@@ -31,7 +32,7 @@ RUn the command to install dependencies:
   ```
 
 ## API Calling Methods
-All the api calling methods reside in `api/index.js` file.
+All the api calling methods reside in `store/index.js` file.
 
 * **sendVerification**
 `sendVerification` method takes an object containing method `email`, `phone_number`. Sends opt to the user via the provided method.
@@ -43,7 +44,18 @@ If user gets verified successfully, redirect user to home page of the applicatio
 * **getGoogleAuthenticatorQR**
 `getGoogleAuthenticatorQR` method is used return the QR code link which you can use to register on Google Authenticator App.
 
+* **enableAuthentication**
+`enableAuthentication` method takes an object containing method `email`, `phone_number`, `google_authenticator` Sends opt to the user via the provided method.
 
+* **verifyEnableAuthenticationCode**
+`verifyEnableAuthenticationCode` method takes object containing `method` and `code` that was sent to user to be verified.
+If user gets verified successfully, two factor authentication is enabled for that method and user is redirected to AuthTypes page of the application.
+
+* **checkAuthenticationStatus**
+`checkAuthenticationStatus` method returns the type of two factor authentication enabled for that particular user
+
+* **disableAuthenticationStatus**
+`disableAuthenticationStatus` method disables any type of two factor authentication which is enabled for that particular user
 ## Manual Setup
 
 1. If you want to use the module directly, or in other modules, you can do so by importing it and using the following properties.
@@ -64,19 +76,19 @@ const TwoFactorAuthentication = modules[module_index].value.navigator;  //module
 
 ## Features
 
-### Verify code 
-By clicking "Verify", the code provided is verified against the code sent to phone number or email
+### Send OTP
+By clicking "Send OTP", the code is sent through the enabled authentication method
 ### Select verification method
-By clicking 'choose verification method', verification method can be selected for authentication
+By opening the dropdown, verification method to enable two factor authentication can be selected.
 
 ### Verification by email
-By clicking the "Email" button, verification code is sent to user email.
+By choosing the "Email" option, verification code is sent to user email.
 
 ### Verification by sms
-By clicking the "sms" button, verification code is sent to user phone number.
+By choosing the "sms" option, verification code is sent to user phone number.
 
 ### Verification by 2FA
-By clicking the "2FA" button, authentication through google Authenticator generated token can be achieved.
+By choosing the "2FA" option, authentication through google Authenticator generated token can be achieved.
 
 ### Set up 2FA on same device
 By clicking "set up on same device", Google Authenticator account sets up automatically
