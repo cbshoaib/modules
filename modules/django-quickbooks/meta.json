@@ -1,0 +1,5 @@
+{
+  "title": "Quickbooks (Django)",
+  "description": "Quickbooks backend",
+  "root": "/backend/modules"
+}
