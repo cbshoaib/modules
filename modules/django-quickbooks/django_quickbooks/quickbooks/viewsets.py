@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .serializers import *
-from .services.quickbooks import QuickbookService
+from .services.quickbooks import QuickbooksService
 
 
 class QuickbookViewSet(viewsets.GenericViewSet):
@@ -14,9 +14,9 @@ class QuickbookViewSet(viewsets.GenericViewSet):
         "create_access_token": AccessTokenSerializer,
         "create_an_account": CreateAccountSerializer,
         "update_full_account_detail": UpdateAccountSerializer,
-        "create_a_note_attachable": CreateNoteAttachmentSerializer,
-        "delete_an_attachable": DeleteAttachmentSerializer,
-        "update_an_attachable": UpdateAttachmentSerializer,
+        "create_a_note_attachable": CreateNoteAttachableSerializer,
+        "delete_an_attachable": DeleteAttachableSerializer,
+        "update_an_attachable": UpdateAttachableSerializer,
         "upload_an_attachable": UploadAttachableSerializer,
         "create_bill_payment": CreateBillPaymentSerializer,
         "void_bill_payment": VoidBillPaymentSerializer,
@@ -33,7 +33,7 @@ class QuickbookViewSet(viewsets.GenericViewSet):
         "update_invoice": UpdateInvoiceSerializer
     }
 
-    quickbook_service = QuickbookService()
+    quickbook_service = QuickbooksService()
 
     def get_serializer_class(self):
         return self.allowed_serializers.get(self.action)
@@ -157,21 +157,6 @@ class QuickbookViewSet(viewsets.GenericViewSet):
             payload=serializer.data)
         return Response(data=response.get("data"), status=response.get("status_code"))
 
-    @action(detail=False, methods=['post'], url_path='upload-an-attachable')
-    def upload_an_attachable(self, request):
-        """
-          Upload an Attachable. \n
-          :Quickbooks-Authorization: access_token (required)
-          :body_params (form-data): FileName
-          :return: Returns details about uploaded Attachable.
-         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        response = self.quickbook_service.upload_attachable(
-            access_token=request.META.get("HTTP_QUICKBOOKS_AUTHORIZATION"),
-            payload=serializer.data)
-        return Response(data=response.get("data"), status=response.get("status_code"))
-
     @action(detail=False, methods=['post'], url_path='create-bill-payment')
     def create_bill_payment(self, request):
         """
@@ -228,9 +213,9 @@ class QuickbookViewSet(viewsets.GenericViewSet):
         :path_params: bill_payment_id
         :return: Returns bill payment detail.
         """
-        response = self.quickbook_service.read_attachable(
+        response = self.quickbook_service.read_bill_payment(
             access_token=request.META.get("HTTP_QUICKBOOKS_AUTHORIZATION"),
-            attachable_id=kwargs.get('bill_payment_id'))
+            bill_payment_id=kwargs.get('bill_payment_id'))
         return Response(data=response.get("data"), status=response.get("status_code"))
 
     @action(detail=False, methods=['post'], url_path='update-bill-payment')
@@ -317,7 +302,7 @@ class QuickbookViewSet(viewsets.GenericViewSet):
         """
         response = self.quickbook_service.send_payment(access_token=request.META.get("HTTP_QUICKBOOKS_AUTHORIZATION"),
                                                        payment_id=kwargs.get('payment_id'),
-                                                       receiver_email=request.GET.get('receiver_email'))
+                                                       receiver_email=request.query_params.get('receiver_email'))
         return Response(data=response.get("data"), status=response.get("status_code"))
 
     @action(detail=False, methods=['post'], url_path='create-customer')
@@ -435,7 +420,7 @@ class QuickbookViewSet(viewsets.GenericViewSet):
         """
         response = self.quickbook_service.send_invoice(access_token=request.META.get("HTTP_QUICKBOOKS_AUTHORIZATION"),
                                                        invoice_id=kwargs.get('invoice_id'),
-                                                       receiver_email=request.GET.get('receiver_email'))
+                                                       receiver_email=request.query_params.get('receiver_email'))
         return Response(data=response.get("data"), status=response.get("status_code"))
 
     @action(detail=False, methods=['post'], url_path='update-invoice')

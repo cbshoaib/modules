@@ -36,19 +36,19 @@ class AttachableReferenceSerializer(serializers.Serializer):
     EntityRef = EntitySerializer()
 
 
-class CreateNoteAttachmentSerializer(serializers.Serializer):
+class CreateNoteAttachableSerializer(serializers.Serializer):
     Note = serializers.CharField(required=True)
     AttachableRef = AttachableReferenceSerializer(required=False, many=True)
 
 
-class DeleteAttachmentSerializer(serializers.Serializer):
+class DeleteAttachableSerializer(serializers.Serializer):
     SyncToken = serializers.CharField(required=True)
     Id = serializers.CharField(required=True)
     domain = serializers.CharField(required=True)
     AttachableRef = AttachableReferenceSerializer(many=True, required=False)
 
 
-class UpdateAttachmentSerializer(serializers.Serializer):
+class UpdateAttachableSerializer(serializers.Serializer):
     SyncToken = serializers.CharField(required=True)
     Id = serializers.CharField(required=True)
     domain = serializers.CharField(required=True)
@@ -177,7 +177,7 @@ class UpdateCustomerSerializer(serializers.Serializer):
     SyncToken = serializers.CharField(required=False)
     CompanyName = serializers.CharField(required=False)
     Balance = serializers.FloatField(required=False)
-    Taxable = serializers.BooleanField()
+    Taxable = serializers.BooleanField(required=False)
     PrimaryEmailAddr = CustomerEmailSerializer()
     PrimaryPhone = CustomerPhoneSerializer()
 

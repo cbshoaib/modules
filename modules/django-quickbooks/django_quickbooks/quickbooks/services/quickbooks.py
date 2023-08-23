@@ -37,7 +37,7 @@ class QuickbookBase:
             return {"data": e.response.json(), "status_code": e.response.status_code}
 
 
-class QuickbookService(QuickbookBase):
+class QuickbooksService(QuickbookBase):
     def get_auth_token(self, code):
         try:
             url = f'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
@@ -120,20 +120,6 @@ class QuickbookService(QuickbookBase):
         try:
             url = f'{self.INTUIT_QUICKBOOK_BASE_URL}/v3/company/{self.INTUIT_QUICKBOOK_ACCOUNT_ID}/attachable?minorversion=65'
             response = self._api_call(request_type='POST', url=url, headers=self.get_headers(access_token=access_token),
-                                      payload=payload)
-            return response
-        except Exception as e:
-            return {"data": {"error": e.args}, "status_code": status.HTTP_400_BAD_REQUEST}
-
-    def upload_attachable(self, access_token, payload):
-        try:
-            custom_header = {
-                'Authorization': f'Bearer {access_token}',
-                'Content-Type': 'multipart/form-data',
-                'Accept': 'application/json'
-            }
-            url = f'{self.INTUIT_QUICKBOOK_BASE_URL}/v3/company/{self.INTUIT_QUICKBOOK_ACCOUNT_ID}/upload?minorversion=65'
-            response = self._api_call(request_type='POST', url=url, headers=custom_header,
                                       payload=payload)
             return response
         except Exception as e:
