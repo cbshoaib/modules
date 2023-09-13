@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class QuickbookConfig(AppConfig):
-    name = 'quickbooks'
+    name = 'modules.django_quickbooks.quickbooks'
+    verbose_name = "Quickbooks"

@@ -11,22 +11,22 @@ class QuickBooksTestCases(APITestCase):
 
     def setUp(self):
         self.headers = {
-            "Quickbooks-Authorization": "fVAuQmEDWWYQxATzkJScfkyk-uQmEDWWYQxAWWYQxATzkJScfkykJScfkyk-uQmEDWWYQzkJScfkykJScfkyk-uQmEDWWYQ0Zqe1dAD_7rd2"}
+            "Quickbooks-Authorization": "uQmEDWWYQxAWWYQxATzkJScfVAuQmEDWWYQxATzkJScfkykfkykJScfkyk-uQmEDWWYQzkJfVAuQmEDWWYQxATzkJScfkykScfkykJScfkyk2"}
 
     @mock.patch('modules.django_quickbooks.quickbooks.services.quickbooks.QuickbooksService.get_auth_token')
     def test_get_auth_token(self, get_auth_token_mock):
         mock_response = {'data': {
-            "access_token": "fVAuQmEDWWYQxATzkJScfkyk-uQmEDWWYQxAWWYQxATzkJScfkykJScfkyk-uQmEDWWYQzkJScfkykJScfkyk-uQmEDWWYQ0Zqe1dAD_7rd2_",
+            "access_token": "uQmEDWWYQxAWWYQxATzkJScfVAuQmEDWWYQxATzkJScfkykfkykJScfkyk-uQmEDWWYQzkJfVAuQmEDWWYQxATzkJScfkykScfkykJScfkyk2",
             "token_type": "bearer",
             "x_refresh_token_expires_in": 87400,
-            "id_token": "CSu8efVAuQmEDWWYQxATzkJScfkyk-uQmEDWWYQxAWWYQxATzkJScfkykJScfkyk-uQmEDWWYQ0Zqe1dAD_7rd2_Lh-P_vPs6IqzsUYNc",
-            "refresh_token": "8BP4vAB11701513937bmI4qlc7wIzJaQ66fHndkZY5uF9BGchz",
+            "id_token": "QmEDWWYQzkJfVAuQmEDWWYQxATzkJScfkykScfkykJScfkyk2-uQmEDWWYQxAWWYQxATzkJScfkykJScfkyk-uQmEDWWYQ0Zqe1dAD_7rd2_Lh-P_vPs6IqzsUYNc",
+            "refresh_token": "mI4qlc7wIzJaQ66fHndkZY5uF9BGchz-QmEDWWYQzkJfVAuQmEDWWYQxATzkJScfkykScfkykJScfkyk2",
             "expires_in": 3800
         }}
         get_auth_token_mock.return_value = mock_response
         url = reverse('quickbook_service-create-access-token')
         data = {
-            "code": "AB117015139378BP4vbmI4qlc7wIz"
+            "code": "8BP4vbmI4qlc7wIzahdgbhw7dw7"
         }
         serializer = AccessTokenSerializer(data=data)
         response = self.client.post(url, data=data, format='json')
@@ -38,7 +38,7 @@ class QuickBooksTestCases(APITestCase):
     def test_get_auth_token_without_authorization_code(self):
         url = reverse('quickbook_service-create-access-token')
         data = {
-            "wrong_code": "AB117015139378BP4vbmI4qlc7wIz"
+            "wrong_code": "8BP4vbmI4qlc7wIsSahd13gbhw7dw7"
         }
         serializer = AccessTokenSerializer(data=data)
         response = self.client.post(url, data=data, format='json')

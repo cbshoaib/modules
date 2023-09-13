@@ -1,4 +1,4 @@
-# Quickbooks
+# Quickbooks backend configuration and information
 
 By implementing this module, users will be able to process the accounting creation, payment processing, refund charges,
 budget and payment management.
@@ -27,8 +27,10 @@ Get the Quickbooks API keys and credentials by the following steps:
 5. Get you quickbooks client id and client secret and save it.
 6. On the top right, click on profile icon and then go to the "Sandbox".
 7. Copy your sandbox company id for your "INTUIT_QUICKBOOK_ACCOUNT_ID"
-6. Assign it to the variable the name of the variable should be "INTUIT_QUICKBOOK_CLIENT_ID", "
+8. Assign it to the variable the name of the variable should be "INTUIT_QUICKBOOK_CLIENT_ID", "
    INTUIT_QUICKBOOK_CLIENT_SECRETS" and "INTUIT_QUICKBOOK_ACCOUNT_ID"
+9. To get the code from quickbooks to generate the `access_token` use the url with required
+   params `https://appcenter.intuit.com/connect/oauth2?client_id={quickbooks_client_id}&response_type=code&scope={scopes}&redirect_uri={sanbox_or_live_uri}&state={state_token}`
 
 ## Environment variables
 
@@ -82,12 +84,3 @@ Here is a collection of all the api endpoints for the Quickbooks module.
 Here is
 the [Module Specification Document](https://docs.google.com/document/d/1j4c0-YgRuZWh7sg66f5Y4zAHTbAlojzY2mspNPZbz58/edit?usp=sharing),
 which provides more information about the module's actual intentions.
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-Please make sure to update tests as appropriate.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
